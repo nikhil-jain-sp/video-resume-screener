@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  participant Q as Queue
+  participant G as Graph
+  participant M as Models
+  participant T as Tools (MCP)
+  participant R as Recruiter
+  participant A as ATS
+  Q->>G: job(video, rubric v3)
+  G->>G: intake: consent, age, dedupe
+  G->>M: transcribe (fallback if confidence low)
+  G->>G: guard: redact + strip injection
+  par specialists
+    G->>M: communication
+  and
+    G->>M: domain (+ KB passages)
+  and
+    G->>T: verify claims
+  and
+    G->>G: signal quality notes
+  end
+  G->>M: critic re-score (other model, order swapped)
+  G->>G: router sets tier
+  G-->>R: interrupt: scores, quotes, clips, flags
+  Note over G: state checkpointed, can wait for days
+  alt rerun
+    R->>G: rerun + reason
+    G->>M: speech-to-text, specialists, synthesizer, critic again
+    G-->>R: interrupt again
+  end
+  R->>G: advance / hold / reject + reason (+ corrections)
+  G->>A: write decision and note

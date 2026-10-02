@@ -1,0 +1,31 @@
+flowchart TD
+  S([Video job]) --> A1["1 Intake (no LLM)<br/>ffprobe · consent · age · dedupe"]
+  A1 -- "no consent, or under 18<br/>without parental consent" --> MAN([Manual queue<br/>no model sees the video])
+  A1 --> A2["2 Perception<br/>primary ASR → fallback ASR if confidence < 0.75<br/>OCR on-screen text · words per minute"]
+  A2 -- "under 40 words/min<br/>(highlight reel)" --> A10
+  A2 --> A3["3 Guard (no LLM)<br/>redact names, pronouns, contact details<br/>strip instruction-like speech"]
+
+  subgraph P[Parallel. Only the claims verifier has tools]
+    A4["4 Communication<br/>storytelling · delivery"]
+    A5["5 Domain<br/>domain knowledge · audience<br/>grounded on sports KB"]
+    A6["6 Claims verifier<br/>verified / unverified / mismatch<br/>max 5 claims"]
+    A7["7 Signal quality<br/>SNR, pace, missing close<br/>notes only, never scored"]
+  end
+  A3 --> A4 & A5 & A6 & A7
+  A4 & A5 & A6 & A7 --> A8["8 Synthesizer<br/>one score per criterion · abstain allowed<br/>no overall score below 60% coverage"]
+  A8 --> A9["9 Critic (different model)<br/>quotes must be word for word<br/>prohibited-signal check<br/>independent re-score + order swap"]
+  A9 --> A10["10 Router (no LLM)<br/>fast_track · standard · needs_review · human_only<br/>no reject tier"]
+  A10 --> H{{"Recruiter review<br/>LangGraph interrupt(), state checkpointed"}}
+  H -- "rerun (max 2)" --> A2
+  H -- "advance / hold / reject<br/>+ name + reason + corrections" --> ATS["Sync to ATS<br/>only writer"]
+  H -. corrections .-> GOLD[(Test set)]
+  ATS --> E([Done])
+
+  classDef det fill:#ffffff,stroke:#1F3A5F,stroke-dasharray:4 3,color:#1F3A5F
+  classDef llm fill:#1F3A5F,stroke:#1F3A5F,color:#ffffff
+  classDef grd fill:#2E7D6B,stroke:#2E7D6B,color:#ffffff
+  classDef hum fill:#B5651D,stroke:#B5651D,color:#ffffff
+  class A1,A10,ATS det
+  class A2,A4,A5,A6,A7,A8 llm
+  class A3,A9 grd
+  class H,MAN hum

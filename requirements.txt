@@ -1,0 +1,7 @@
+langgraph>=1.0
+pydantic>=2.7
+pyyaml>=6.0
+pytest>=8.0
+# Only needed for real models. Works with any OpenAI-compatible endpoint
+# (hosted APIs, vLLM / Ollama for self-hosted models, an internal gateway).
+# openai>=1.40

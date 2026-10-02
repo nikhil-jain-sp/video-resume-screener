@@ -1,0 +1,27 @@
+# Written and signed off by the hiring manager before any candidate is scored.
+role_id: REQ-2026-014
+title: Sports Social Presenter (Football / Cricket)
+version: 3
+criteria:
+  - id: domain_knowledge
+    owner: domain            # which specialist agent scores it
+    weight: 0.35
+    description: Accurate, specific knowledge of the sports covered (players, tactics, recent results).
+    keywords: [tactic, formation, press, half-spaces, innings, strike rate, death overs, matchup, transfer, league, fixture, analysis]
+  - id: audience_growth
+    owner: domain
+    weight: 0.20
+    description: Evidence of building or engaging an audience (formats, numbers they owned).
+    keywords: [followers, views, engagement, grew, audience, series, reels, shorts, subscribers]
+  - id: storytelling
+    owner: communication
+    weight: 0.25
+    description: Structures a segment with a hook, a point of view and a clear close.
+    keywords: [story, hook, here's why, imagine, the moment, so what, takeaway]
+  - id: delivery_clarity
+    owner: communication
+    weight: 0.20
+    description: Clear, well-paced delivery, judged from transcript pace and structure only.
+    keywords: []
+# The agents must never use these, and the critic flags any reasoning that does.
+prohibited_signals: [appearance, face, attractive, accent, age, gender, race, religion, disability, voice pitch, skin]

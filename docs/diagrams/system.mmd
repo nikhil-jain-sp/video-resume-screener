@@ -1,0 +1,41 @@
+flowchart TB
+  UP["Candidate upload page<br/>video · CV · consent · age"] --> OS[("Object storage<br/>encrypted, in-region")]
+  OS --> Q[["Job queue<br/>dedupe key = hash(video, rubric version)"]]
+  Q -. "fails 3 times" .-> DLQ[["Dead-letter queue"]]
+  Q --> W
+
+  subgraph W["Screening workers (LangGraph)"]
+    direction LR
+    G["Screening graph<br/>10 agents, see agent diagram"] <--> CP[("Postgres checkpointer<br/>paused reviews survive deploys")]
+  end
+
+  subgraph M["Models"]
+    direction LR
+    ASR["Speech-to-text<br/>faster-whisper on GPU + fallback"]
+    SPEC["Specialist model"]
+    CRIT["Critic model<br/>different family"]
+  end
+
+  subgraph D["Data"]
+    direction LR
+    KB[("Sports knowledge base<br/>BM25 + pgvector")]
+    RUB[("Rubrics, versioned")]
+    AUD[("Audit log<br/>hashes, no raw PII")]
+  end
+
+  subgraph X["Integrations (MCP servers)"]
+    direction LR
+    WEB["Web search"]
+    SPORT["Sports data API"]
+    CRM["Agency CRM"]
+  end
+
+  W --> M
+  W --> D
+  W -- "claims verifier only" --> X
+  W -- "interrupt: scores, quotes, flags" --> UI["Recruiter review queue<br/>clips at cited timestamps"]
+  UI -- "decision + name + reason" --> W
+  W -- "only after a decision" --> ATS["ATS"]
+  UI -- "corrections" --> GOLD[("Labelled test set")]
+  GOLD --> EV["Evals in CI<br/>agreement · name-swap · quote checks<br/>block deploy on regression"]
+  W -. "traces per candidate" .-> OBS["Tracing + dashboards<br/>latency · cost · review rates by group"]
